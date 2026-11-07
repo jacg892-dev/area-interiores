@@ -33,6 +33,11 @@
   const same = (a, b) => { if (a.length !== b.length) return false; let d = 0; for (let i = 0; i < a.length; i++) d |= a[i] ^ b[i]; return d === 0; };
   const newSession = cred => { cred.session = b64(rand(24)); ls.set(K.cred, cred); ls.set(K.sess, { t: cred.session, exp: Date.now() + SESSION_DAYS * 864e5 }); };
 
+  // Restablecimiento remoto del acceso: al cambiar RESET_ID, cada dispositivo olvida su contraseña
+  // (no sus datos) una sola vez y vuelve al acceso inicial con cambio obligatorio.
+  const RESET_ID = "2026-11-07-1";
+  if (ls.get("presu-reset") !== RESET_ID) { ls.del(K.cred); ls.del(K.sess); ls.del(K.fails); ls.set("presu-reset", RESET_ID); }
+
   // limpia restos de la versión anterior (huella SHA-256 sin sal)
   ls.del("presu-auth"); try { sessionStorage.removeItem("presu-auth"); } catch (e) {}
 
